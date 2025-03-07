@@ -9,7 +9,7 @@ import argparse
 import random
 import shutil
 
-MODE_DEBUG = False
+MODE_DEBUG = True
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -24,6 +24,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--brick_name', type=str, default="brick4x2", help='Name of the brick (default: brick4x2)')
 parser.add_argument('--total_samples', type=int, default=100, help='Total number of samples to generate (default: 100)')
 parser.add_argument('--overwrite', action='store_true', help='Overwrite existing data')
+parser.add_argument('--width', type=int, default=1280, help='Width of the image (default: 1280)')
+parser.add_argument('--height', type=int, default=720, help='Height of the image (default: 720)')
+parser.add_argument('--class_label', type=int, default=0, help='Class label (default: 0)')
 
 args = parser.parse_args()
 brick_name = args.brick_name
@@ -32,6 +35,9 @@ overwrite = args.overwrite
 labels_dir = os.path.join(os.path.dirname(__file__), brick_name, "labels")
 img_dir = os.path.join(os.path.dirname(__file__), brick_name, "JPEGImages")
 mask_dir = os.path.join(os.path.dirname(__file__), brick_name, "mask")
+class_label = args.class_label
+
+w, h = args.width, args.height
 
 if not overwrite:
     list_of_images = os.listdir(img_dir)
@@ -84,8 +90,6 @@ vertices = np.array([
 p.addUserDebugPoints(vertices[:, :3], pointColorsRGB=[[1, 0, 0]] * len(vertices), pointSize=10)
 
 # Camera parameters
-w, h = 1280, 720
-w, h = 640, 480
 focal_x = 949.8506622
 focal_y = 949.70506462
 x_offset = 627.84604663
@@ -161,7 +165,6 @@ while sample_id < total_samples:
     x_range = coordinates[:, 0].max() - coordinates[:, 0].min()
     y_range = coordinates[:, 1].max() - coordinates[:, 1].min()
 
-    class_label = 0
 
     label = f'{class_label} {" ".join(f"{value:.6f}" for value in coordinates.flatten().tolist())} {x_range:.6f} {y_range:.6f} {focal_x:.6f} {focal_y:.6f} {width} {height} {x_offset:.6f} {y_offset:.6f} {width} {height}'
 

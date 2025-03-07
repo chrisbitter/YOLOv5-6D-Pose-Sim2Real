@@ -13,7 +13,6 @@ names : ["brick4x2"]
 background_path: "./data/VOCdevkit/VOC2012/JPEGImages"
 coords: 18
 
-diam : 0.0751
 gpus : 0
 
 nc: 1  # number of classes
