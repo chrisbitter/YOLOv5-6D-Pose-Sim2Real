@@ -7,6 +7,7 @@ import os
 import logging
 import argparse
 import random
+import shutil
 
 MODE_DEBUG = False
 
@@ -29,17 +30,25 @@ brick_name = args.brick_name
 total_samples = args.total_samples
 overwrite = args.overwrite
 labels_dir = os.path.join(os.path.dirname(__file__), brick_name, "labels")
-os.makedirs(labels_dir, exist_ok=True)
 img_dir = os.path.join(os.path.dirname(__file__), brick_name, "JPEGImages")
-os.makedirs(img_dir, exist_ok=True)
 mask_dir = os.path.join(os.path.dirname(__file__), brick_name, "mask")
-os.makedirs(mask_dir, exist_ok=True)
 
 if not overwrite:
     list_of_images = os.listdir(img_dir)
     if len(list_of_images) > 0:
         logger.info("Data already exists, skipping generation")
         exit()
+else:
+    logger.info("Overwriting data")
+    for folder in [labels_dir, img_dir, mask_dir]:
+        try:
+            shutil.rmtree(folder)
+        except:
+            pass
+
+os.makedirs(labels_dir, exist_ok=True)
+os.makedirs(img_dir, exist_ok=True)
+os.makedirs(mask_dir, exist_ok=True)
 
 
 # Camera limits make sure that perspectives are unique
@@ -218,15 +227,24 @@ train = list_of_images[:int(len(list_of_images)*0.8)]
 test = list_of_images[int(len(list_of_images)*0.8):int(len(list_of_images)*0.9)]
 validation = list_of_images[int(len(list_of_images)*0.9):]
 
+print(len(train), len(test), len(validation))
+
 # write the lists to a file
 with open(train_txt, "w") as f:
-    for item in train:
+    for item in train[:-1]:
         f.write("%s\n" % item)
+    
+    f.write(train[-1])
+
 
 with open(test_txt, "w") as f:
-    for item in test:
+    for item in test[:-1]:
         f.write("%s\n" % item)
 
+    f.write(test[-1])
+
 with open(validation_txt, "w") as f:
-    for item in validation:
+    for item in validation[:-1]:
         f.write("%s\n" % item)
+
+    f.write(validation[-1])
