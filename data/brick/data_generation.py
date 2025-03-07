@@ -5,6 +5,8 @@ import cv2
 import trimesh
 import os
 import logging
+import argparse
+import random
 
 MODE_DEBUG = False
 
@@ -16,15 +18,28 @@ logger.setLevel(logging.DEBUG if MODE_DEBUG else logging.INFO)
 p.connect(p.GUI if MODE_DEBUG else p.DIRECT)
 
 # Set the path to the PLY file
-brick_name = "brick4x2"
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--brick_name', type=str, default="brick4x2", help='Name of the brick (default: brick4x2)')
+parser.add_argument('--total_samples', type=int, default=100, help='Total number of samples to generate (default: 100)')
+parser.add_argument('--overwrite', action='store_true', help='Overwrite existing data')
 
+args = parser.parse_args()
+brick_name = args.brick_name
+total_samples = args.total_samples
+overwrite = args.overwrite
 labels_dir = os.path.join(os.path.dirname(__file__), brick_name, "labels")
 os.makedirs(labels_dir, exist_ok=True)
 img_dir = os.path.join(os.path.dirname(__file__), brick_name, "JPEGImages")
 os.makedirs(img_dir, exist_ok=True)
 mask_dir = os.path.join(os.path.dirname(__file__), brick_name, "mask")
 os.makedirs(mask_dir, exist_ok=True)
+
+if not overwrite:
+    list_of_images = os.listdir(img_dir)
+    if len(list_of_images) > 0:
+        logger.info("Data already exists, skipping generation")
+        exit()
 
 
 # Camera limits make sure that perspectives are unique
@@ -71,7 +86,6 @@ projection_matrix = [1.484141659687981, 0.0, 0.0, 0.0, 0.0, 2.638069623943646, 0
 
 projection_matrix_tf = np.array(projection_matrix).reshape(4, 4)
 
-total_samples = 10000
 sample_id = 0
 
 from tqdm import tqdm
@@ -187,3 +201,29 @@ while sample_id < total_samples:
             break
 
 cv2.destroyAllWindows()  # Close all OpenCV windows
+
+list_of_images = os.listdir(img_dir)
+shuffled_list = random.shuffle(list_of_images)
+
+print(len(list_of_images))
+
+train_txt = os.path.join(os.path.dirname(__file__), brick_name, "train.txt")
+test_txt = os.path.join(os.path.dirname(__file__), brick_name, "test.txt")
+validation_txt = os.path.join(os.path.dirname(__file__), brick_name, "validation.txt")
+
+train = list_of_images[:int(len(list_of_images)*0.8)]
+test = list_of_images[int(len(list_of_images)*0.8):int(len(list_of_images)*0.9)]
+validation = list_of_images[int(len(list_of_images)*0.9):]
+
+# write the lists to a file
+with open(train_txt, "w") as f:
+    for item in train:
+        f.write("%s\n" % item)
+
+with open(test_txt, "w") as f:
+    for item in test:
+        f.write("%s\n" % item)
+
+with open(validation_txt, "w") as f:
+    for item in validation:
+        f.write("%s\n" % item)
