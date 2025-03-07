@@ -220,6 +220,7 @@ shuffled_list = random.shuffle(list_of_images)
 print(len(list_of_images))
 
 train_txt = os.path.join(os.path.dirname(__file__), brick_name, "train.txt")
+train_range_txt = os.path.join(os.path.dirname(__file__), brick_name, "training_range.txt")
 test_txt = os.path.join(os.path.dirname(__file__), brick_name, "test.txt")
 validation_txt = os.path.join(os.path.dirname(__file__), brick_name, "validation.txt")
 
@@ -236,6 +237,13 @@ with open(train_txt, "w") as f:
     
     f.write(train[-1])
 
+with open(train_range_txt, "w") as f:
+    for item in train[:-1]:
+        sample_id, _ = item.split(".")
+        f.write("%s\n" % int(sample_id))
+
+    sample_id, _ = train[-1].split(".")
+    f.write("%s\n" % int(sample_id))
 
 with open(test_txt, "w") as f:
     for item in test[:-1]:
