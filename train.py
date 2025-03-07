@@ -357,7 +357,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 tb_writer.add_scalar(tag, x, epoch)  # tensorboard
 
             if wandb:
-                wandb.log({tag: x})  # W&B
+                wandb.log({tag: x, "epoch": epoch})  # W&B
 
         # DDP process 0 or single-GPU
         if rank in [-1, 0]:
@@ -394,7 +394,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                     if tb_writer:
                         tb_writer.add_scalar(tag, x, epoch)  # tensorboard
                     if wandb:
-                        wandb.log({tag: x})  # W&B
+                        wandb.log({tag: x, "epoch": epoch})  # W&B
                 # Update best
                 fi = fitness(np.array(results).reshape(1, -1))  # weighted combination of  [mean_corner_err_2d, acc, acc3d, acc5cm5deg]
                 if fi > best_fitness:
@@ -440,7 +440,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             if wandb:
                 files = ['results.png', 'confusion_matrix.png', *[f'{x}_curve.png' for x in ('F1', 'PR', 'P', 'R')]]
                 wandb.log({"Results": [wandb.Image(str(save_dir / f), caption=f) for f in files
-                                       if (save_dir / f).exists()]})
+                                       if (save_dir / f).exists()], "epoch": epoch})
                 if opt.log_artifacts:
                     wandb.log_artifact(artifact_or_path=str(final), type='model', name=save_dir.stem)
 
