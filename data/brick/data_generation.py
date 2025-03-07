@@ -166,19 +166,17 @@ while sample_id < total_samples:
 
     label = f'{class_label} {" ".join(f"{value:.6f}" for value in coordinates.flatten().tolist())} {x_range:.6f} {y_range:.6f} {focal_x:.6f} {focal_y:.6f} {width} {height} {x_offset:.6f} {y_offset:.6f} {width} {height}'
 
-    sample_file_name = f"{sample_id:06}"
-
-    file_path = os.path.join(labels_dir, f"{sample_file_name}.txt")
+    file_path = os.path.join(labels_dir, f"{sample_id:06}.txt")
 
     with open(file_path, "w") as f:
         f.write(label)
 
-    img_path = os.path.join(img_dir, f"{sample_file_name}.jpg")
+    img_path = os.path.join(img_dir, f"{sample_id:06}.jpg")
     rgb_image = np.array(rgb)
     rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR) 
     cv2.imwrite(img_path, rgb_image)
 
-    mask_path = os.path.join(mask_dir, f"{sample_file_name}.png")
+    mask_path = os.path.join(mask_dir, f"{sample_id:04}.png")
     seg += 1
     seg *= 255
     cv2.imwrite(mask_path, seg)
