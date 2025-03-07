@@ -109,8 +109,8 @@ while sample_id < total_samples:
     camera_position = [np.random.uniform(*camera_limits[0]), np.random.uniform(*camera_limits[1]), np.random.uniform(*camera_limits[2])]
     camera_target = [np.random.uniform(-0.1, 0.1), np.random.uniform(-0.1, 0), 0]  # Keep the z-coordinate fixed to 0 to ensure the brick is in view
 
-    # camera_position = [0.1, 0, .1]
-    # camera_target = [0, 0, 0]
+    camera_position = [0.1, 0, .1]
+    camera_target = [0, 0, 0]
     
     camera_up = np.random.uniform(low=[-1, -1, -1], high=[1, 1, 1])
     camera_up /= np.linalg.norm(camera_up)  # Normalize the camera_up vector
@@ -140,6 +140,8 @@ while sample_id < total_samples:
     logger.debug(normalized_projection)
 
     coordinates = normalized_projection[:2].T
+    print(coordinates.shape)
+
     if np.any(coordinates < -1) or np.any(coordinates > 1):
         logger.debug("Coordinates out of bounds")
         
@@ -153,8 +155,12 @@ while sample_id < total_samples:
     logger.debug("Coordinates")
     logger.debug(coordinates)
 
-    x_range = coordinates[0].max() - coordinates[0].min()
-    y_range = coordinates[1].max() - coordinates[1].min()
+    coordinates[:, 1] = -coordinates[:, 1]
+    coordinates += 1
+    coordinates /= 2
+
+    x_range = coordinates[:, 0].max() - coordinates[:, 0].min()
+    y_range = coordinates[:, 1].max() - coordinates[:, 1].min()
 
     class_label = 0
 
