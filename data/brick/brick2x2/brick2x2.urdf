@@ -1,0 +1,17 @@
+<robot name="brick">
+  <link name="brick_link">
+
+    <collision>
+      <geometry>
+        <mesh filename="./brick2x2.obj"/>
+      </geometry>
+    </collision>
+    <visual>
+      <geometry>
+        <mesh filename="./brick2x2.obj"/>
+      </geometry>
+    </visual>
+
+
+  </link>
+</robot>
