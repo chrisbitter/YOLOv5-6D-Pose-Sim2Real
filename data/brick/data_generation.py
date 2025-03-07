@@ -200,7 +200,10 @@ while sample_id < total_samples:
         if key == ord('q'):
             break
 
-cv2.destroyAllWindows()  # Close all OpenCV windows
+try:
+    cv2.destroyAllWindows()  # Close all OpenCV windows
+except:
+    pass
 
 list_of_images = os.listdir(img_dir)
 shuffled_list = random.shuffle(list_of_images)
