@@ -9,17 +9,6 @@ import argparse
 import random
 import shutil
 
-MODE_DEBUG = True
-
-logging.basicConfig()
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if MODE_DEBUG else logging.INFO)
-
-# Connect to PyBullet
-p.connect(p.GUI if MODE_DEBUG else p.DIRECT)
-
-# Set the path to the PLY file
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--brick_name', type=str, default="brick4x2", help='Name of the brick (default: brick4x2)')
 parser.add_argument('--total_samples', type=int, default=100, help='Total number of samples to generate (default: 100)')
@@ -27,6 +16,7 @@ parser.add_argument('--overwrite', action='store_true', help='Overwrite existing
 parser.add_argument('--width', type=int, default=1280, help='Width of the image (default: 1280)')
 parser.add_argument('--height', type=int, default=720, help='Height of the image (default: 720)')
 parser.add_argument('--class_label', type=int, default=0, help='Class label (default: 0)')
+parser.add_argument('--debug', action='store_true', help='Mode debug')
 
 args = parser.parse_args()
 brick_name = args.brick_name
@@ -35,9 +25,17 @@ overwrite = args.overwrite
 labels_dir = os.path.join(os.path.dirname(__file__), brick_name, "labels")
 img_dir = os.path.join(os.path.dirname(__file__), brick_name, "JPEGImages")
 mask_dir = os.path.join(os.path.dirname(__file__), brick_name, "mask")
-class_label = args.class_label
-
 w, h = args.width, args.height
+class_label = args.class_label
+debug = args.debug
+
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG if debug else logging.INFO)
+
+# Connect to PyBullet
+p.connect(p.GUI if debug else p.DIRECT)
+
 
 if not overwrite:
     list_of_images = os.listdir(img_dir)
@@ -187,7 +185,7 @@ while sample_id < total_samples:
 
     sample_id += 1
     progress_bar.update(1)
-    if MODE_DEBUG:
+    if debug:
         logger.debug("Pixel Coordinates")
         # Convert normalized coordinates to pixel coordinates
         pixels_x = normalized_projection[0] * w/2 + w/2
