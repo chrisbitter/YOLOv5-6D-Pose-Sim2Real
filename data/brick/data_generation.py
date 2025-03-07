@@ -140,7 +140,6 @@ while sample_id < total_samples:
     logger.debug(normalized_projection)
 
     coordinates = normalized_projection[:2].T
-    print(coordinates.shape)
 
     if np.any(coordinates < -1) or np.any(coordinates > 1):
         logger.debug("Coordinates out of bounds")
