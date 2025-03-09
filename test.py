@@ -318,6 +318,9 @@ def test(data, weights=None, batch_size=1,
     mean_corner_err_2d = np.mean(errs_corner2D)
     nts = float(testing_samples)
     
+    mean_err_trans = np.mean(errs_trans)
+    mean_err_angle = np.mean(errs_angle)
+    
     t1 = np.array(t1)
     t2 = np.array(t2)
     t3 = np.array(t3)
@@ -357,7 +360,23 @@ def test(data, weights=None, batch_size=1,
         if wandb and wandb.run:
             wandb.log({"Images": wandb_images})
 
-    return (mean_corner_err_2d, acc, acc3d, acc5cm5deg, *(loss_items.cpu().detach()/ len(dataloader)).tolist(), loss.cpu().numpy().item())
+# ['val/mean_corner_err_2d', 'val/acc', 'val/acc3d', 'val/acc5cm5deg', # val metrics
+#  'val/obj_loss', 'val/box_loss', 'val/cls_loss', 'val/total_loss']  # val loss  
+
+    obj_loss, box_loss, cls_loss = (loss_items.cpu().detach()/ len(dataloader)).tolist()
+
+    return {
+        'mean_corner_err_2d': mean_corner_err_2d,
+        'acc': acc,
+        'acc3d': acc3d,
+        'acc5cm5deg': acc5cm5deg,
+        'mean_err_trans': mean_err_trans,
+        'mean_err_angle': mean_err_angle,
+        'obj_loss': obj_loss,
+        'box_loss': box_loss,
+        'cls_loss': cls_loss,
+        'total_loss': loss.cpu().numpy().item()
+    }
 
 
 if __name__ == '__main__':

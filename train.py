@@ -379,30 +379,29 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                                     compute_loss=True,
                                     symetric = opt.symetric)
 
-                print(results)
+                kpi_results = [results[key] for key in ['mean_corner_err_2d', 'acc', 'acc3d', 'acc5cm5deg']]
+                results = {'val/' + k: v for k, v in results.items()}
+
                 # Write
                 with open(results_file, 'a') as f:
-                    f.write(s + '%10.4g' * 8 % results + '\n')  # append metrics, val_loss
-
+                    f.write(str(results) + '\n')
                 
                 # Log
-                val_tags = ['val/mean_corner_err_2d', 'val/acc', 'val/acc3d', 'val/acc5cm5deg', # val metrics
-                         'val/obj_loss', 'val/box_loss', 'val/cls_loss', 'val/total_loss']  # val loss  
-                
-                for x, tag in zip(list(results), val_tags):
+                for tag, x in results.items():
 
                     if tb_writer:
                         tb_writer.add_scalar(tag, x, epoch)  # tensorboard
                     if wandb:
                         wandb.log({tag: x, "epoch": epoch})  # W&B
+
                 # Update best
-                fi = fitness(np.array(results).reshape(1, -1))  # weighted combination of  [mean_corner_err_2d, acc, acc3d, acc5cm5deg]
+                fi = fitness(np.array(kpi_results).reshape(1, -1))  # weighted combination of  [mean_corner_err_2d, acc, acc3d, acc5cm5deg]
                 if fi > best_fitness:
                     
                     best_fitness = fi
 
                 if opt.standard_lr:
-                    scheduler.step(list(results)[-1])
+                    scheduler.step(kpi_results[-1])
                 # Save model
                 if (not opt.nosave) or (final_epoch and not opt.evolve):  # if save
                     
