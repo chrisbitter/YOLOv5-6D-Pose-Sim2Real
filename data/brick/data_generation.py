@@ -11,8 +11,10 @@ import shutil
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--brick_name', type=str, default="brick4x2", help='Name of the brick (default: brick4x2)')
+parser.add_argument('--outdir', type=str, default=None, help='Output directory (default: None, will be created in the brick directory)')
 parser.add_argument('--total_samples', type=int, default=100, help='Total number of samples to generate (default: 100)')
 parser.add_argument('--overwrite', action='store_true', help='Overwrite existing data')
+parser.add_argument('--append', action='store_true', help='Append to existing data')
 parser.add_argument('--width', type=int, default=1280, help='Width of the image (default: 1280)')
 parser.add_argument('--height', type=int, default=720, help='Height of the image (default: 720)')
 parser.add_argument('--class_label', type=int, default=0, help='Class label (default: 0)')
@@ -22,9 +24,15 @@ args = parser.parse_args()
 brick_name = args.brick_name
 total_samples = args.total_samples
 overwrite = args.overwrite
-labels_dir = os.path.join(os.path.dirname(__file__), brick_name, "labels")
-img_dir = os.path.join(os.path.dirname(__file__), brick_name, "JPEGImages")
-mask_dir = os.path.join(os.path.dirname(__file__), brick_name, "mask")
+append = args.append
+outdir = args.outdir
+
+if outdir is None:
+    outdir = brick_name
+
+labels_dir = os.path.join(os.path.dirname(__file__), outdir, "labels")
+img_dir = os.path.join(os.path.dirname(__file__), outdir, "JPEGImages")
+mask_dir = os.path.join(os.path.dirname(__file__), outdir, "mask")
 w, h = args.width, args.height
 class_label = args.class_label
 debug = args.debug
@@ -36,12 +44,15 @@ logger.setLevel(logging.DEBUG if debug else logging.INFO)
 # Connect to PyBullet
 p.connect(p.GUI if debug else p.DIRECT)
 
+assert not (overwrite and append), "Cannot overwrite and append at the same time"
 
-if not overwrite:
+if not overwrite and not append:
     list_of_images = os.listdir(img_dir)
     if len(list_of_images) > 0:
         logger.info("Data already exists, skipping generation")
         exit()
+elif append:
+    logger.info("Appending to existing data")
 else:
     logger.info("Overwriting data")
     for folder in [labels_dir, img_dir, mask_dir]:
@@ -114,12 +125,20 @@ while sample_id < total_samples:
     # camera_position = [0.1, 0, .1]
     # camera_target = [0, 0, 0]
     
-    camera_up = np.random.uniform(low=[-1, -1, -1], high=[1, 1, 1])
+    camera_up = np.random.uniform(low=[-1, -1, 1], high=[1, 1, 1])
     camera_up /= np.linalg.norm(camera_up)  # Normalize the camera_up vector
     # camera_up = [-1, 0, 0]      # Adjust the up direction to maintain a proper view
 
     view_matrix = p.computeViewMatrix(camera_position, camera_target, camera_up)
     view_matrix_tf = np.array(view_matrix).reshape(4, 4).T
+
+    brick_color = np.random.rand(3)
+    brick_color /= np.linalg.norm(brick_color)
+    brick_color *= np.random.uniform(0.5, 1)
+    brick_color = brick_color.tolist()
+
+    brick_color += [1]
+    p.changeVisualShape(brick_id, -1, rgbaColor=brick_color)  # Update the brick's color
 
     # Take a picture
     width, height, rgb, _, seg = p.getCameraImage(width=w, height=h, viewMatrix=view_matrix, projectionMatrix=projection_matrix)
@@ -166,17 +185,17 @@ while sample_id < total_samples:
 
     label = f'{class_label} {" ".join(f"{value:.6f}" for value in coordinates.flatten().tolist())} {x_range:.6f} {y_range:.6f} {focal_x:.6f} {focal_y:.6f} {width} {height} {x_offset:.6f} {y_offset:.6f} {width} {height}'
 
-    file_path = os.path.join(labels_dir, f"{sample_id:06}.txt")
+    file_path = os.path.join(labels_dir, f"{sample_id:05}{class_label}.txt")
 
     with open(file_path, "w") as f:
         f.write(label)
 
-    img_path = os.path.join(img_dir, f"{sample_id:06}.jpg")
+    img_path = os.path.join(img_dir, f"{sample_id:05}{class_label}.jpg")
     rgb_image = np.array(rgb)
     rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR) 
     cv2.imwrite(img_path, rgb_image)
 
-    mask_path = os.path.join(mask_dir, f"{sample_id:04}.png")
+    mask_path = os.path.join(mask_dir, f"{sample_id:03}{class_label}.png")
     seg += 1
     seg *= 255
     cv2.imwrite(mask_path, seg)
