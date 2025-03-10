@@ -242,10 +242,10 @@ shuffled_list = random.shuffle(list_of_images)
 
 print(len(list_of_images))
 
-train_txt = os.path.join(os.path.dirname(__file__), brick_name, "train.txt")
-train_range_txt = os.path.join(os.path.dirname(__file__), brick_name, "training_range.txt")
-test_txt = os.path.join(os.path.dirname(__file__), brick_name, "test.txt")
-validation_txt = os.path.join(os.path.dirname(__file__), brick_name, "validation.txt")
+train_txt = os.path.join(os.path.dirname(__file__), outdir, "train.txt")
+train_range_txt = os.path.join(os.path.dirname(__file__), outdir, "training_range.txt")
+test_txt = os.path.join(os.path.dirname(__file__), outdir, "test.txt")
+validation_txt = os.path.join(os.path.dirname(__file__), outdir, "validation.txt")
 
 train = list_of_images[:int(len(list_of_images)*0.8)]
 test = list_of_images[int(len(list_of_images)*0.8):int(len(list_of_images)*0.9)]

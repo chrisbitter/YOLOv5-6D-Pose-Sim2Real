@@ -1,12 +1,12 @@
 
 
 # train and val data as 1) directory: path/images/, 2) file: path/images.txt, or 3) list: [path1/images/, path2/images/]
-train: ["./data/brick/brick4x2/train.txt", "./data/brick/brick2x2/train.txt"]
-val: ["./data/brick/brick4x2/test.txt", "./data/brick/brick2x2/test.txt"]
-test: ["./data/brick/brick4x2/test.txt", "./data/brick/brick2x2/test.txt"]
+train: ./data/brick/brick/train.txt 
+val: ./data/brick/brick/test.txt 
+test: ./data/brick/brick/test.txt 
 
-mesh: ["./data/brick/brick4x2/brick4x2.ply", "./data/brick/brick2x2/brick2x2.ply"]
-tr_range: ["./data/brick/brick4x2/training_range.txt", "./data/brick/brick2x2/training_range.txt"]
+mesh: ./data/brick/brick4x2/brick4x2.ply # used to make code run
+tr_range: ./data/brick/brick/training_range.txt
 backup : ./backup/brick
 names : ["brick4x2", "brick2x2"]
 
