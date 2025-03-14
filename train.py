@@ -419,6 +419,10 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                     if best_fitness == fi:
                         print(f"Saving best model with fitness: {fi}")
                         torch.save(ckpt, best)
+
+                        if wandb:
+                            wandb.log_model(model=best, aliases=["best"])
+
                     del ckpt
 
         # end epoch ----------------------------------------------------------------------------------------------------
