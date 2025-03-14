@@ -420,10 +420,13 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                         print(f"Saving best model with fitness: {fi}")
                         torch.save(ckpt, best)
 
-                        if wandb:
-                            wandb.log_model(model=best, aliases=["best"])
+                        if wandb and opt.log_artifacts:
+                            wandb.log_artifact(artifact_or_path=str(best), type='model', name=save_dir.stem, aliases=["best"])
 
+                            
                     del ckpt
+
+                    
 
         # end epoch ----------------------------------------------------------------------------------------------------
     # end training
@@ -445,7 +448,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 wandb.log({"Results": [wandb.Image(str(save_dir / f), caption=f) for f in files
                                        if (save_dir / f).exists()], "epoch": epoch})
                 if opt.log_artifacts:
-                    wandb.log_artifact(artifact_or_path=str(final), type='model', name=save_dir.stem)
+                    wandb.log_artifact(artifact_or_path=str(final), type='model', name=save_dir.stem, aliases=["final"])
 
         # Test best.pt
         logger.info('%g epochs completed in %.3f hours.\n' % (epoch - start_epoch + 1, (time.time() - t0) / 3600))
